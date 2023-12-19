@@ -1,6 +1,12 @@
 # Prerequisites
 *.d
 
+#folder
+*.vs*
+Release
+Debug
+*.user*
+
 # Compiled Object files
 *.slo
 *.lo
