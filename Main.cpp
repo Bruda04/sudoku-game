@@ -18,8 +18,6 @@ int main(int argc, char* argv[]) {
 
     Sudoku9 sudoku(firstFilename, secondFilename);
 
-    sudoku.writeToFile("test.txt");
-
     menuMain(sudoku);
 
     return 0;

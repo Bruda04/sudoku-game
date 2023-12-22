@@ -12,7 +12,7 @@ const std::string PROMPTCHAR = ">>";
 
 const std::string WELCOMEMESSAGE = "Welcome to Sudokusfera, have a gread time!";
 
-void menuMain(const Sudoku9 &sudoku);
+void menuMain(Sudoku9& sudoku);
 
 unsigned short dialogLoadFrom();
 unsigned short dialogSolver();

@@ -1,13 +1,15 @@
 #include "Menu.h"
 #include <iostream> 
 
-void menuMain(const Sudoku9& sudoku) {
+void menuMain(Sudoku9& sudoku) {
 	clearTerminal();
 	displayWelcome();
 
 	pauseDialog();
 
 	while (true) {
+		sudoku.incrementRoundCounter();
+
 		clearTerminal();
 		int loadFrom = dialogLoadFrom();
 		clearTerminal();
@@ -15,12 +17,12 @@ void menuMain(const Sudoku9& sudoku) {
 		switch (loadFrom) {
 		case OPTIONGENERATESUDOKU:
 			// TODO
-			std::cout << "Your sudoku is placed in " << "file2.txt" << std::endl;
+			std::cout << "Your sudoku is placed in " << sudoku.getUnsolvedFilename() << std::endl;
 			pauseDialog();
 			break;
 		case OPTIONLOADSUDOKU:
-			// TODO
-			dialogContinue("file2.txt");
+			dialogContinue(sudoku.getUnsolvedFilename());
+			sudoku.readFile(sudoku.getUnsolvedFilename(), sudoku.unsolved);
 			break;
 		}
 
@@ -30,20 +32,27 @@ void menuMain(const Sudoku9& sudoku) {
 
 		switch (solver) {
 		case OPTIONLOADSOLUTION:
-			// TODO
-			std::cout << "RESENJE KORISNIKA" << std::endl;
-			dialogContinue("testFile.txt");
+			dialogContinue(sudoku.getSolvedFilename());
+			sudoku.readFile(sudoku.getSolvedFilename(), sudoku.unsolved);
+
+			clearTerminal();
+			{
+				int g = 0;
+				int b = 0;
+				int c = sudoku.getRoundCounter();
+				sudoku.getStatistics(g, b);
+				displayStats(c, g, b);
+			}
+
+			pauseDialog();
 			break;
 		case OPTIONSOLVESUDOKU:
-			// TODO
-			std::cout << "SOLVE SUDOKU" << std::endl;
+			sudoku.backtrack(sudoku.unsolved, 0, 0);
+			sudoku.writeToFile(sudoku.getSolvedFilename(), sudoku.unsolved);
 			pauseDialog();
 			break;
 		}
 
-		clearTerminal();
-		displayStats(0,0,0);
-		pauseDialog();
 
 		clearTerminal();
 		int rematch = dialogRestart();
@@ -67,13 +76,13 @@ void displayWelcome() {
 	std::cout << WELCOMEMESSAGE << std::endl;
 }
 
-void displayStats(unsigned int roundCount, unsigned int placedBad, unsigned int placedGood) {
+void displayStats(unsigned int roundCount, unsigned int placedGood, unsigned int placedBad) {
 	std::cout << "Your statistics for this game:" << std::endl;
 
 
-	std::cout << "Number of rigthly placed numbers: " << placedGood;
-	std::cout << "Number of badly placed numbers: " << placedBad;
-	std::cout << "This is your round number - " << roundCount;
+	std::cout << "Number of rigthly placed numbers: " << placedGood << std::endl;
+	std::cout << "Number of badly placed numbers: " << placedBad << std::endl;
+	std::cout << "This is your round number - " << roundCount << std::endl;
 	std::cout << std::endl;
 
 
@@ -141,7 +150,7 @@ void dialogContinue(std::string filename) {
 	std::cout << "You must now edit " << filename << std::endl;
 	std::cout << "When you have finished editing, pleas press ENTER" << std::endl;
 	pauseDialog();
-	
+
 }
 
 void pauseDialog() {
