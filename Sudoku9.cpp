@@ -1,46 +1,31 @@
 #include "Sudoku9.h"
 #include <fstream>
 #include <iostream>
+#include <cstdlib> 
 
-Sudoku9::Sudoku9(std::string unsolvedFilename, std::string solvedFilename):
+Sudoku9::Sudoku9(std::string unsolvedFilename, std::string solvedFilename) :
 	unsolvedFilename(unsolvedFilename),
 	solvedFilename(solvedFilename),
-	roundCounter(0) {
+	roundCounter(0)
+	{
 
-	unsolved = new int* [9];
-	for (int i = 0; i < 9; ++i) {
-		unsolved[i] = new int[9];
-	}
+	grid = new int* [DIMENSIONS];
+	for (int i = 0; i < DIMENSIONS; ++i) {
+		grid[i] = new int[DIMENSIONS];
 
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
-			unsolved[i][j] = emptyCell;
+		for (int j = 0; j < DIMENSIONS; ++j) {
+			grid[i][j] = EMPTYCELLINT;
 		}
 	}
 
-	solved = new int* [9];
-	for (int i = 0; i < 9; ++i) {
-		solved[i] = new int[9];
-	}
-
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
-			solved[i][j] = emptyCell;
-		}
-	}
+	srand(time(0));
 }
 
 Sudoku9::~Sudoku9() {
 	for (int i = 0; i < 9; ++i) {
-		delete[] unsolved[i];
+		delete[] grid[i];
 	}
-	delete[] unsolved;
-
-	for (int i = 0; i < 9; ++i) {
-		delete[] solved[i];
-	}
-
-	delete[] solved;
+	delete[] grid;
 }
 
 void Sudoku9::readFile(std::string filename, int** table) {
@@ -53,11 +38,11 @@ void Sudoku9::readFile(std::string filename, int** table) {
 
     std::string line = "";
 	int number = 0;
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < DIMENSIONS; ++i) {
 		std::getline(inputFile, line);
-		for (int j = 0; j < 9; ++j) {
-			if (line[j] == emptyChar) {
-				number = emptyCell;
+		for (int j = 0; j < DIMENSIONS; ++j) {
+			if (line[j] == EMPTYCELLCHAR) {
+				number = EMPTYCELLINT;
 			} else {
 				char c = line[j];
 				number = std::atoi(&c);
@@ -78,10 +63,10 @@ void Sudoku9::writeToFile(std::string filename, int** table) {
         std::cerr << "Unable to open the file for writing." << std::endl;
     }
 
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
-			if (table[i][j] == emptyCell) {
-				outputFile << emptyChar;
+	for (int i = 0; i < DIMENSIONS; ++i) {
+		for (int j = 0; j < DIMENSIONS; ++j) {
+			if (table[i][j] == EMPTYCELLINT) {
+				outputFile << EMPTYCELLCHAR;
 			}
 			else {
 				outputFile << table[i][j];
@@ -93,29 +78,59 @@ void Sudoku9::writeToFile(std::string filename, int** table) {
     outputFile.close();
 }
 
-unsigned int Sudoku9::getRoundCounter() {
-	return roundCounter;
+int random(int l, int h) {
+	return (rand() % (h - l + 1)) + l;
 }
 
-void Sudoku9::incrementRoundCounter() {
-	roundCounter++;
+void Sudoku9::generateSudoku(int** table, int removeCount) {
+	int pivot = random(1, 9);
+
+	table[0][0] = pivot;
+	backtrack(table, 0, 0);
+
+	while (removeCount != 0) {
+		int i = random(0, 8);
+		int j = random(0, 8);
+
+		int oldVal = table[i][j];
+
+		if (oldVal == EMPTYCELLINT) {
+			continue;
+		}
+
+		table[i][j] = EMPTYCELLINT;
+		removeCount--;
+		continue;
+
+	}
+
+	if (!meanCellFillingFactor(table)) {
+		for (int i = 0; i < DIMENSIONS; ++i) {
+			for (int j = 0; j < DIMENSIONS; ++j) {
+				table[i][j] = EMPTYCELLINT;
+			}
+		}
+		generateSudoku(table, removeCount);
+	}
+	
 }
 
-bool Sudoku9::backtrack(int** copyTable, int i, int j) {
-	if (i == 9) {
+
+bool Sudoku9::backtrack(int** table, int i, int j) {
+	if (i == DIMENSIONS) {
 		return true;
-	} else if (j == 9) {
-		return backtrack(copyTable, i + 1, 0);
-	} else if (copyTable[i][j] != emptyCell) {
-		return backtrack(copyTable, i, j + 1);
+	} else if (j == DIMENSIONS) {
+		return backtrack(table, i + 1, 0);
+	} else if (table[i][j] != EMPTYCELLINT) {
+		return backtrack(table, i, j + 1);
 	} else {
 		for (int val = 1; val < 10; val++) {
-			if (isValidCall(copyTable, i, j, val, false)) {
-				copyTable[i][j] = val;
-				if (backtrack(copyTable, i, j+1)) {
+			if (isValidCall(table, i, j, val, false)) {
+				table[i][j] = val;
+				if (backtrack(table, i, j+1)) {
 					return true;
 				}
-				copyTable[i][j] = emptyCell;
+				table[i][j] = EMPTYCELLINT;
 			}
 		}
 
@@ -123,13 +138,13 @@ bool Sudoku9::backtrack(int** copyTable, int i, int j) {
 	}
 }
 
-bool Sudoku9::isValidCall(int** originalTable, int i, int j, int val, bool skipPosition) {
+bool Sudoku9::isValidCall(int** table, int i, int j, int val, bool skipPosition) {
 	int block_i = i / 3;
 	int block_j = j / 3;
 
 	for (int bi = block_i*3; bi < block_i*3+3; ++bi) {
 		for (int bj = block_j * 3; bj < block_j * 3 + 3; ++bj) {
-			if (originalTable[bi][bj] == val) {
+			if (table[bi][bj] == val) {
 				if (skipPosition && bi == i && bj == j) {
 					continue;
 				}
@@ -138,8 +153,8 @@ bool Sudoku9::isValidCall(int** originalTable, int i, int j, int val, bool skipP
 		}
 	}
 
-	for (int ci = 0; ci < 9; ++ci) {
-		if (originalTable[i][ci] == val) {
+	for (int ci = 0; ci < DIMENSIONS; ++ci) {
+		if (table[i][ci] == val) {
 			if (skipPosition && ci == j) {
 				continue;
 			}
@@ -147,8 +162,8 @@ bool Sudoku9::isValidCall(int** originalTable, int i, int j, int val, bool skipP
 		}
 	}
 
-	for (int ri = 0; ri < 9; ri++) {
-		if (originalTable[ri][j] == val) {
+	for (int ri = 0; ri < DIMENSIONS; ri++) {
+		if (table[ri][j] == val) {
 			if (skipPosition && ri == i) {
 				continue;
 			}
@@ -159,34 +174,43 @@ bool Sudoku9::isValidCall(int** originalTable, int i, int j, int val, bool skipP
 	return true;
 }
 
-int** Sudoku9::copyArray(int** original) {
-	int** newArray = new int* [9];
-	for (int i = 0; i < 9; ++i) {
-		newArray[i] = new int[9];
-	}
+int Sudoku9::filledInCell(int** table, int i, int j) {
+	int n = 0;
 
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
-			newArray[i][j] = original[i][j];
+	int block_i = i / 3;
+	int block_j = j / 3;
+
+	for (int bi = block_i * 3; bi < block_i * 3 + 3; ++bi) {
+		for (int bj = block_j * 3; bj < block_j * 3 + 3; ++bj) {
+			if (table[bi][bj] != EMPTYCELLINT) {
+				n++;
+			}
 		}
 	}
 
-	return newArray;
+	return n;
 }
 
-void Sudoku9::destroyArray(int** original) {
-	for (int i = 0; i < 9; ++i) {
-		delete[] original[i];
+bool Sudoku9::meanCellFillingFactor(int** table) {
+	double sum = 0;
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			if (filledInCell(table, i * 3, j * 3) > 6) {
+				return false;
+			}
+		}
 	}
-	delete[] original;
+
+	return true;
 }
+
 
 void Sudoku9::getStatistics(int& good, int& bad) {
-	int** table = unsolved;
+	int** table = grid;
 	good = 0;
 	bad = 0;
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 9; j++) {
+	for (int i = 0; i < DIMENSIONS; i++) {
+		for (int j = 0; j < DIMENSIONS; j++) {
 			if (isValidCall(table, i, j, table[i][j], true)) {
 				good++;
 			} else {
@@ -204,3 +228,10 @@ std::string Sudoku9::getSolvedFilename() {
 	return solvedFilename;
 }
 
+unsigned int Sudoku9::getRoundCounter() {
+	return roundCounter;
+}
+
+void Sudoku9::incrementRoundCounter() {
+	roundCounter++;
+}
