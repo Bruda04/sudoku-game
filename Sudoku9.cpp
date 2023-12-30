@@ -18,11 +18,14 @@ Sudoku9::Sudoku9(std::string unsolvedFilename, std::string solvedFilename) :
 		}
 	}
 
+	writeToFile(unsolvedFilename, grid);
+	writeToFile(solvedFilename, grid);
+
 	srand(time(0));
 }
 
 Sudoku9::~Sudoku9() {
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < DIMENSIONS; ++i) {
 		delete[] grid[i];
 	}
 	delete[] grid;
@@ -78,14 +81,32 @@ void Sudoku9::writeToFile(std::string filename, int** table) {
     outputFile.close();
 }
 
-int random(int l, int h) {
+int Sudoku9::random(int l, int h) {
 	return (rand() % (h - l + 1)) + l;
 }
 
-void Sudoku9::generateSudoku(int** table, int removeCount) {
-	int pivot = random(1, 9);
+void Sudoku9::resetGrid() {
+	for (int i = 0; i < DIMENSIONS; ++i) {
+		for (int j = 0; j < DIMENSIONS; ++j) {
+			grid[i][j] = EMPTYCELLINT;
+		}
+	}
+}
 
-	table[0][0] = pivot;
+void Sudoku9::generateSudoku(int** table, int removeCount) {
+	int pivotRow[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9,};
+
+	for (int i = 0; i < DIMENSIONS; ++i) {
+		int newIndex = random(0, 8);
+		int oldVal = pivotRow[newIndex];
+		pivotRow[newIndex] = pivotRow[i];
+		pivotRow[i] = oldVal;
+	}
+
+	for (int i = 0; i < DIMENSIONS; ++i) {
+		table[0][i] = pivotRow[i];
+	}
+
 	backtrack(table, 0, 0);
 
 	while (removeCount != 0) {
@@ -203,7 +224,6 @@ bool Sudoku9::meanCellFillingFactor(int** table) {
 
 	return true;
 }
-
 
 void Sudoku9::getStatistics(int& good, int& bad) {
 	int** table = grid;

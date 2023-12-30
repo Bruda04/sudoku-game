@@ -16,7 +16,7 @@ void menuMain(Sudoku9& sudoku) {
 
 		switch (loadFrom) {
 		case OPTIONGENERATESUDOKU:
-			sudoku.generateSudoku(sudoku.grid, 65);
+			sudoku.generateSudoku(sudoku.grid, sudoku.LEVELHARD);
 			sudoku.writeToFile(sudoku.getUnsolvedFilename(), sudoku.grid);
 			std::cout << "Your sudoku is placed in " << sudoku.getUnsolvedFilename() << std::endl;
 			pauseDialog();
@@ -37,6 +37,7 @@ void menuMain(Sudoku9& sudoku) {
 			sudoku.readFile(sudoku.getSolvedFilename(), sudoku.grid);
 
 			clearTerminal();
+
 			{
 				int g = 0;
 				int b = 0;
@@ -50,6 +51,7 @@ void menuMain(Sudoku9& sudoku) {
 		case OPTIONSOLVESUDOKU:
 			sudoku.backtrack(sudoku.grid, 0, 0);
 			sudoku.writeToFile(sudoku.getSolvedFilename(), sudoku.grid);
+			std::cout << "Your sudoku is placed in " << sudoku.getSolvedFilename() << std::endl;
 			pauseDialog();
 			break;
 		}

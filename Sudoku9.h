@@ -59,7 +59,13 @@ public:
 	void generateSudoku(int** table, int removeCount);
 
 	//  Constant representing remove count for level hard
-	const int LEVELHARD = 64;
+	const int LEVELHARD = 60;
+
+	//  Constant representing remove count for level medium
+	const int LEVELMEDIUM = 50;
+
+	//  Constant representing remove count for level easy
+	const int LEVELEASY = 30;
 private:
 
 	//  Constant representing filename for unolved sudoku
@@ -72,7 +78,7 @@ private:
 	const int EMPTYCELLINT = 0;
 
 	// Constant for representing empty cell when working with file
-	const char EMPTYCELLCHAR = ' ';
+	const char EMPTYCELLCHAR = '0';
 
 	// Constant for number of ROWS/COLS
 	const int DIMENSIONS = 9;
@@ -81,8 +87,11 @@ private:
 	bool isValidCall(int** table, int i, int j, int val, bool skipPosition);
 	int filledInCell(int** table, int i, int j);
 	bool meanCellFillingFactor(int** table);
+	int random(int l, int h);
+	void resetGrid();
 	
 	// Number of current game round
 	unsigned int roundCounter;
 
+	friend class Tests;
 };

@@ -1,5 +1,6 @@
 ﻿#include "Menu.h"
 #include "Sudoku9.h"
+#include "Tests.h"
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -16,7 +17,12 @@ int main(int argc, char* argv[]) {
 
     Sudoku9 sudoku(firstFilename, secondFilename);
 
-    menuMain(sudoku);
+    
+    //menuMain(sudoku);
+    
+    
+    Tests test(&sudoku);
+    test.testMain();
 
     return 0;
 }
