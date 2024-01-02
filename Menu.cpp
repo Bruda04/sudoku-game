@@ -8,49 +8,61 @@ void menuMain(Sudoku9& sudoku) {
 	pauseDialog();
 
 	while (true) {
-		sudoku.incrementRoundCounter();
+		sudoku.incrementRoundCounter(); //start of the new round
 
 		clearTerminal();
-		int loadFrom = dialogLoadFrom();
+		int loadFrom = dialogLoadFrom(); // getting users choice for loading the puzzle
 		clearTerminal();
 
 		switch (loadFrom) {
 		case OPTIONGENERATESUDOKU:
-			sudoku.generateSudoku(sudoku.grid, sudoku.LEVELHARD);
-			sudoku.writeToFile(sudoku.getUnsolvedFilename(), sudoku.grid);
+			sudoku.generateSudoku(sudoku.grid, sudoku.LEVELHARD); // generate puzzle
+			sudoku.writeToFile(sudoku.getUnsolvedFilename(), sudoku.grid); // write puzzle to file
+			sudoku.displayGrid(sudoku.grid); // display the puzzle
+
 			std::cout << "Your sudoku is placed in " << sudoku.getUnsolvedFilename() << std::endl;
 			pauseDialog();
+
 			break;
+
 		case OPTIONLOADSUDOKU:
-			dialogContinue(sudoku.getUnsolvedFilename());
-			sudoku.readFile(sudoku.getUnsolvedFilename(), sudoku.grid);
+			dialogContinue(sudoku.getUnsolvedFilename()); // whaiting for user to place puzzle in file
+
+			sudoku.readFile(sudoku.getUnsolvedFilename(), sudoku.grid); // loading puzzle from file
+			sudoku.displayGrid(sudoku.grid); // displaying loaded puzzle
+
+			pauseDialog();
 			break;
 		}
 
 		clearTerminal();
-		int solver = dialogSolver();
+		int solver = dialogSolver(); // getting users choice for loading the solution
 		clearTerminal();
 
 		switch (solver) {
 		case OPTIONLOADSOLUTION:
 			dialogContinue(sudoku.getSolvedFilename());
-			sudoku.readFile(sudoku.getSolvedFilename(), sudoku.grid);
+			sudoku.readFile(sudoku.getSolvedFilename(), sudoku.grid); // loading solved puzzle from file
 
 			clearTerminal();
 
+			sudoku.displayGrid(sudoku.grid); // displaying loaded solution
 			{
-				int g = 0;
-				int b = 0;
-				int c = sudoku.getRoundCounter();
-				sudoku.getStatistics(g, b);
-				displayStats(c, g, b);
+				int g = 0; // placed good
+				int b = 0; // placed bad
+				int c = sudoku.getRoundCounter(); // round number
+				sudoku.getStatistics(sudoku.grid, g, b); // calculating the statistics of the solution
+				displayStats(c, g, b); // displaying the statistics
 			}
 
 			pauseDialog();
 			break;
+
 		case OPTIONSOLVESUDOKU:
-			sudoku.backtrack(sudoku.grid, 0, 0);
-			sudoku.writeToFile(sudoku.getSolvedFilename(), sudoku.grid);
+			sudoku.backtrack(sudoku.grid, 0, 0); // solving the puzzle
+			sudoku.writeToFile(sudoku.getSolvedFilename(), sudoku.grid); // writting the solution to file
+			sudoku.displayGrid(sudoku.grid); // displaying the solution
+
 			std::cout << "Your sudoku is placed in " << sudoku.getSolvedFilename() << std::endl;
 			pauseDialog();
 			break;
@@ -58,7 +70,7 @@ void menuMain(Sudoku9& sudoku) {
 
 
 		clearTerminal();
-		int rematch = dialogRestart();
+		int rematch = dialogRestart(); // getting user input for rematch/exit
 		clearTerminal();
 
 		switch (rematch) {
@@ -99,9 +111,11 @@ unsigned short dialogLoadFrom() {
 
 	while (true) {
 		std::cout << PROMPTCHAR;
+
 		unsigned short userInput;
 		std::cin >> userInput;
-		std::cin.ignore();
+		std::cin.ignore(); // clearing the /n from cin buffer
+
 		if (userInput == OPTIONLOADSUDOKU or userInput == OPTIONGENERATESUDOKU) {
 			return userInput;
 		} else {
@@ -118,9 +132,11 @@ unsigned short dialogSolver() {
 
 	while (true) {
 		std::cout << PROMPTCHAR;
+
 		unsigned short userInput;
 		std::cin >> userInput;
-		std::cin.ignore();
+		std::cin.ignore(); // clearing the /n from cin buffer 
+
 		if (userInput == OPTIONLOADSOLUTION or userInput == OPTIONSOLVESUDOKU) {
 			return userInput;
 		} else {
@@ -138,9 +154,11 @@ unsigned short dialogRestart() {
 
 	while (true) {
 		std::cout << PROMPTCHAR;
+
 		unsigned short userInput;
 		std::cin >> userInput;
-		std::cin.ignore();
+		std::cin.ignore(); // clearing the /n from cin buffer
+
 		if (userInput == OPTIONRESTART or userInput == OPTIONEXIT) {
 			return userInput;
 		} else {
@@ -150,19 +168,19 @@ unsigned short dialogRestart() {
 }
 
 void dialogContinue(std::string filename) {
-	std::cout << "You must now edit " << filename << std::endl;
-	std::cout << "When you have finished editing, pleas press ENTER" << std::endl;
+	std::cout << "You must now edit " << filename << std::endl; // displaying which file needs to be edited
+	std::cout << "When you have finished editing" << std::endl;
 	pauseDialog();
 
 }
 
 void pauseDialog() {
-	std::cout << std::endl << "Press ENTER to continue." << std::endl;
+	std::cout << std::endl << "Press ENTER to continue." << std::endl; // pausing the execution until ENTER pressed
 	std::cin.get();
 }
 
 void clearTerminal() {
 	for (int i = 0; i < 50; ++i) {
-		std::cout << std::endl;
+		std::cout << std::endl; // pushing the output of the terminal out of scope
 	}
 }

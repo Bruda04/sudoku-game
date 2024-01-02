@@ -18,11 +18,11 @@ int main(int argc, char* argv[]) {
     Sudoku9 sudoku(firstFilename, secondFilename);
 
     
-    //menuMain(sudoku);
+    menuMain(sudoku);
     
     
     Tests test(&sudoku);
-    test.testMain();
+    //test.testMain();
 
     return 0;
 }

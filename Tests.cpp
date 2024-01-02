@@ -9,7 +9,7 @@ Tests::~Tests() {
 
 
 void Tests::testMain() {
-	std::cout << "Tests for the sudoku class" << std::endl;
+	std::cout << "Tests for the Sudoku9 class" << std::endl;
 
     displayTestName("int Sudoku9::random(int l, int h)");
     testRandom();
@@ -18,13 +18,22 @@ void Tests::testMain() {
     testGetStatistics();
 
     displayTestName("int Sudoku9::filledInCell(int** table, int i, int j)");
-    testGetStatistics();
-
-    displayTestName("void Sudoku9::resetGrid()");
-    testResetGrid();
+    testFilledInCell();
 
     displayTestName("bool Sudoku9::meanCellFillingFactor(int** table)");
+    testMeanCellFillingFactor();
+
+    displayTestName("void Sudoku9::resetGrid(sudoku->grid)");
     testResetGrid();
+
+    displayTestName("\nvoid Sudoku9::writeToFile(std::string filename, int** table)\nvoid Sudoku9::readFile(std::string filename, int** table)");
+    testReadWriteFile();
+
+    displayTestName("bool Sudoku9::backtrack(int** table, int i, int j)");
+    testBacktrack();
+
+    displayTestName("void generateSudoku(int** table, int removeCount)");
+    testGenerateSudoku();
 
     return;
 }
@@ -37,11 +46,12 @@ void Tests::displayTestName(std::string testName) {
 }
 
 void Tests::setGridValues(std::string newGrig[]) {
-    for (int i = 0; i < DIMENSIONS; ++i) {
-        for (int j = 0; j < DIMENSIONS; ++j) {
+    for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
             char c = newGrig[i][j];
-            int number = std::atoi(&c);
-            sudoku->grid[i][j] = number;
+            int number = c - '0'; // converting from char to int
+
+            sudoku->grid[i][j] = number; // setting the number in grid
         }
     }
 }
@@ -53,8 +63,9 @@ bool Tests::testRandom() {
     const int numIterations = 1000000;
 
     for (int i = 0; i < numIterations; ++i) {
-        int result = sudoku -> random(lowerBound, upperBound);
-        if (result < lowerBound || result > upperBound) {
+        int result = sudoku -> random(lowerBound, upperBound); // generating random number
+
+        if (result < lowerBound || result > upperBound) { // if outside scope test fails
             std::cout << "Test failed: Value out of range!" << std::endl;
             return false;
         }
@@ -65,13 +76,15 @@ bool Tests::testRandom() {
 }
 
 bool Tests::testGetStatistics() {
-    sudoku -> resetGrid();
+    sudoku -> resetGrid(sudoku->grid);
 
-    int actualGood, actualBad;
+    int actualGood;
+    int actualBad;
     int expectedGood;
     int expectedBad;
 
-    std::string allWrong[9] = {
+    // testing with empty grid
+    std::string allWrong[] = {
         "000000000",
         "000000000",
         "000000000",
@@ -87,14 +100,15 @@ bool Tests::testGetStatistics() {
     expectedGood = 0;
     expectedBad = 81;
 
-    sudoku->getStatistics(actualGood, actualBad);
+    sudoku->getStatistics(sudoku->grid, actualGood, actualBad);
 
     if (actualGood != expectedGood || actualBad != expectedBad) {
         std::cout << "Test failed: Expected all bad!" << std::endl;
         return false;
     }
 
-    std::string allGood[9] = {
+    // testing with good solution
+    std::string allGood[] = {
         "125368479",
         "734259168",
         "689174235",
@@ -110,7 +124,7 @@ bool Tests::testGetStatistics() {
     expectedGood = 81;
     expectedBad = 0;
 
-    sudoku->getStatistics(actualGood, actualBad);
+    sudoku->getStatistics(sudoku->grid, actualGood, actualBad);
 
     if (actualGood != expectedGood || actualBad != expectedBad) {
         std::cout << "Test failed: Expected all good!" << std::endl;
@@ -123,12 +137,13 @@ bool Tests::testGetStatistics() {
 }
 
 bool Tests::testFilledInCell() {
-    sudoku->resetGrid();
+    sudoku->resetGrid(sudoku->grid);
 
     int actualFilled;
     int expectedFilled;
 
-    std::string filled0[9] = {
+    //testing no filled
+    std::string filled0[] = {
         "000000000",
         "000000000",
         "000000000",
@@ -150,7 +165,8 @@ bool Tests::testFilledInCell() {
         return false;
     }
 
-    std::string filled9[9] = {
+    // testing all filled
+    std::string filled9[] = {
         "125368479",
         "734259168",
         "689174235",
@@ -166,7 +182,7 @@ bool Tests::testFilledInCell() {
 
     expectedFilled = 9;
 
-    actualFilled = sudoku->filledInCell(sudoku->grid, 8, 8);
+    actualFilled = sudoku->filledInCell(sudoku->grid, 2, 2);
 
 
     if (actualFilled != expectedFilled) {
@@ -174,7 +190,8 @@ bool Tests::testFilledInCell() {
         return false;
     }
 
-    std::string filled5[9] = {
+    // testing for 3x3cell overflow
+    std::string filled5[] = {
         "000000000",
         "055000000",
         "666600000",
@@ -202,31 +219,29 @@ bool Tests::testFilledInCell() {
 }
 
 bool Tests::testResetGrid() {
-    sudoku->resetGrid();
+    sudoku->resetGrid(sudoku->grid);
 
-    for (int i = 0; i < 9; ++i) {
-        for (int j = 0; j < 9; ++j) {
-            if (true) {
-                if (sudoku->grid[i][j] != sudoku->EMPTYCELLINT) {
-                    std::cout << "Test failed: Found cell with value != empty value" << std::endl;
-                    return false;
-                }
+    for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
+            if (sudoku->grid[i][j] != sudoku->EMPTYCELLINT) { // if number not reset
+                std::cout << "Test failed: Found cell with value not equal empty value" << std::endl;
+                return false;
             }
         }
     }
-
 
     std::cout << "Test passed!" << std::endl;
     return true;
 }
 
-bool Tests::testMenaCellFillingFactor() {
-    sudoku->resetGrid();
+bool Tests::testMeanCellFillingFactor() {
+    sudoku->resetGrid(sudoku->grid);
 
     int actualStatus;
     int expectedStatus;
 
-    std::string statusTrue[9] = {
+    // testing empty grid
+    std::string statusTrue[] = {
         "000000000",
         "000000000",
         "000000000",
@@ -248,7 +263,8 @@ bool Tests::testMenaCellFillingFactor() {
         return false;
     }
 
-    std::string statusFalse[9] = {
+    // testing more than 6 filled
+    std::string statusFalse[] = {
         "104900000",
         "720900000",
         "653900000",
@@ -268,6 +284,128 @@ bool Tests::testMenaCellFillingFactor() {
     if (actualStatus != expectedStatus) {
         std::cout << "Test failed: Cells not counted" << std::endl;
         return false;
+    }
+
+    std::cout << "Test passed!" << std::endl;
+    return true;
+}
+
+bool Tests::testReadWriteFile() {
+    sudoku->resetGrid(sudoku->grid);
+
+    std::string table[9] = {
+        "125368479",
+        "734259168",
+        "689174235",
+        "216435897",
+        "357891624",
+        "498726513",
+        "961587342",
+        "843912756",
+        "572643981"
+    };
+    setGridValues(table);
+
+    sudoku->writeToFile(testFileName, sudoku->grid); // writing to file
+    sudoku->readFile(testFileName, sudoku->grid); // reading from file
+
+    for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
+            int testVal = table[i][j] - '0'; // converting char to int
+
+            int rwVal = sudoku->grid[i][j]; // value passed through file
+
+            if (testVal != rwVal) { // checking if value got changed while working with file
+                std::cout << "Test failed: Grid written to and read from file doesn't match!" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    std::cout << "Test passed!" << std::endl;
+    return true;
+}
+
+bool Tests::testBacktrack() {
+    sudoku->resetGrid(sudoku->grid);
+
+    // testing with puzzle with only one solution
+    std::string uniqueSolutionSudoku17[] = {
+        "000801000",
+        "000000043",
+        "500000000",
+        "000070800",
+        "000000100",
+        "020030000",
+        "600000075",
+        "003400000",
+        "000200600"
+    };
+
+    // only solution to puzzle
+    std::string uniqueSolutionSudokuSolution[] = {
+        "237841569",
+        "186795243",
+        "594326718",
+        "315674892",
+        "469582137",
+        "728139456",
+        "642918375",
+        "853467921",
+        "971253684"
+    };
+    setGridValues(uniqueSolutionSudoku17);
+
+    sudoku->backtrack(sudoku->grid, 0, 0);
+
+    for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
+            int testVal = uniqueSolutionSudokuSolution[i][j] - '0'; // converting char to int
+            
+            int expected = sudoku->grid[i][j]; // checking if every number matc the only solution
+            if (testVal != expected) {
+                std::cout << "Test failed: Sudoku solution doesn't match!" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    std::cout << "Test passed!" << std::endl;
+    return true;
+}
+
+bool Tests::testGenerateSudoku() {
+    sudoku->resetGrid(sudoku->grid);
+
+    if (!testBacktrack() || !testMeanCellFillingFactor() || !testRandom()){
+        std::cout << "Test failed: Dependent function test failed!" << std::endl;
+        return false;
+    }
+
+    const int numIterations = 50;
+    for (int i = 0; i < numIterations; ++i) {
+        int removeCount = sudoku->LEVELHARD;
+        sudoku->generateSudoku(sudoku->grid, removeCount);
+
+        int actualyRemoved = 0;
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
+            for (int k = 0; k < sudoku->DIMENSIONS; ++k) {
+                if (sudoku->grid[j][k] == sudoku->EMPTYCELLINT) {
+                    actualyRemoved++;
+                }
+            }
+        }
+
+        if (!sudoku->backtrack(sudoku->grid, 0, 0)) {
+            std::cout << "Test failed: Generated puzzle is unsolvable!" << std::endl;
+            return false;
+        }
+
+        if (actualyRemoved != removeCount) {
+            std::cout << "Test failed: Wrong amount of numbers removed!" << std::endl;
+            return false;
+        }
+
     }
 
     std::cout << "Test passed!" << std::endl;
