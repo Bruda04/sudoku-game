@@ -8,8 +8,6 @@ void menuMain(Sudoku9& sudoku) {
 	pauseDialog();
 
 	while (true) {
-		sudoku.incrementRoundCounter(); //start of the new round
-
 		clearTerminal();
 		int loadFrom = dialogLoadFrom(); // getting users choice for loading the puzzle
 		clearTerminal();
@@ -42,18 +40,15 @@ void menuMain(Sudoku9& sudoku) {
 		switch (solver) {
 		case OPTIONLOADSOLUTION:
 			dialogContinue(sudoku.getSolvedFilename());
-			sudoku.readFile(sudoku.getSolvedFilename(), sudoku.grid); // loading solved puzzle from file
+			if (!sudoku.readFile(sudoku.getSolvedFilename(), sudoku.grid)) { // loading solved puzzle from file
+				std::cout << "Sudoku you are solving is not the one from the unsolved file!" << std::endl;
+				pauseDialog();
+				continue;
+			}
 
 			clearTerminal();
 
 			sudoku.displayGrid(sudoku.grid); // displaying loaded solution
-			{
-				int g = 0; // placed good
-				int b = 0; // placed bad
-				int c = sudoku.getRoundCounter(); // round number
-				sudoku.getStatistics(sudoku.grid, g, b); // calculating the statistics of the solution
-				displayStats(c, g, b); // displaying the statistics
-			}
 
 			pauseDialog();
 			break;
@@ -67,7 +62,15 @@ void menuMain(Sudoku9& sudoku) {
 			pauseDialog();
 			break;
 		}
-
+		
+		clearTerminal();
+		sudoku.incrementRoundCounter(); //refresh round number
+		int g = 0; // placed good
+		int b = 0; // placed bad
+		int c = sudoku.getRoundCounter(); // round number
+		sudoku.getStatistics(sudoku.grid, g, b); // calculating the statistics of the solution
+		displayStats(c, g, b); // displaying the statistics
+		pauseDialog();
 
 		clearTerminal();
 		int rematch = dialogRestart(); // getting user input for rematch/exit
@@ -81,10 +84,7 @@ void menuMain(Sudoku9& sudoku) {
 			clearTerminal();
 			return;
 		}
-
-
 	}
-
 }
 
 void displayWelcome() {
@@ -99,8 +99,6 @@ void displayStats(unsigned int roundCount, unsigned int placedGood, unsigned int
 	std::cout << "Number of badly placed numbers: " << placedBad << std::endl;
 	std::cout << "This is your round number - " << roundCount << std::endl;
 	std::cout << std::endl;
-
-
 }
 
 unsigned short dialogLoadFrom() {
@@ -122,7 +120,6 @@ unsigned short dialogLoadFrom() {
 			std::cout << "You must enter a valid option!" << std::endl;
 		}
 	}
-
 }
 
 unsigned short dialogSolver() {
@@ -171,7 +168,6 @@ void dialogContinue(std::string filename) {
 	std::cout << "You must now edit " << filename << std::endl; // displaying which file needs to be edited
 	std::cout << "When you have finished editing" << std::endl;
 	pauseDialog();
-
 }
 
 void pauseDialog() {

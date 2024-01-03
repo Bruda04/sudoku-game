@@ -32,46 +32,42 @@ Sudoku9::~Sudoku9() {
 	delete[] grid;
 }
 
-void Sudoku9::readFile(std::string filename, int** table) {
+bool Sudoku9::readFile(std::string filename, int** table) {
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open()) {
         std::cerr << "Unable to open the file." << std::endl;
-        return;
+        return false;
     }
 
+	bool same = true;
+	bool allEmpty = true;
     std::string line = "";
 	int number = 0;
 
     for (int i = 0; i < DIMENSIONS; ++i) { 
 		std::getline(inputFile, line);
 
-		if (i % 3 == 0 && i != 0) { // if row with "-" => skip
-			std::getline(inputFile, line);
-		}
+		for (int j = 0; j < DIMENSIONS; ++j) {
+			if (line[j] == EMPTYCELLCHAR) {
+				number = EMPTYCELLINT; // if empty
+			} else {
+				char c = line[j];
+				number = c - '0'; // if not empty convert from char to int
 
-		// looping through 3 row segments split by "|"
-		int correction = 0; // adding one position for every "|" passed
-		for (int j = 0; j < DIMENSIONS / 3; ++j) {
-			for (int k = 0; k < DIMENSIONS / 3; k++) {
-				int p = j * 3 + k + correction; // segment * 3 + positionInSegment + correction
-				if (line[p] == EMPTYCELLCHAR) {
-					number = EMPTYCELLINT; // if empty
-				} else {
-					char c = line[p];
-					number = c - '0'; // if not empty convert from char to int
+				allEmpty = false;
+				if (table[i][j] != number && table[i][j] != EMPTYCELLINT) { // if previously set value got changed
+					same = false;
 				}
-
-				table[i][j*3+k] = number; // set the value (segment * 3 + positionInSegment)
 			}
 
-			correction++;
-
+			table[i][j] = number; // set the value
 		}
     }
     
-
     inputFile.close();
+	// returns true only if the previously set values in table staied the same after read
+	return same && !allEmpty;
 }
 
 void Sudoku9::writeToFile(std::string filename, int** table) {
@@ -82,17 +78,7 @@ void Sudoku9::writeToFile(std::string filename, int** table) {
     }
 
 	for (int i = 0; i < DIMENSIONS; ++i) {
-		// splitting every 3 rows
-		if (i % 3 == 0 && i != 0) { // if row with "-"
-			outputFile << "-----------" << std::endl;
-		}
-
 		for (int j = 0; j < DIMENSIONS; ++j) {
-			// splitting every 3 cols
-			if (j % 3 == 0 && j != 0) { // if position in row with "|"
-				outputFile << "|";
-			}
-
 			if (table[i][j] == EMPTYCELLINT) {
 				outputFile << EMPTYCELLCHAR; // if empty
 			}
@@ -277,7 +263,7 @@ void Sudoku9::getStatistics(int** table, int& good, int& bad) {
 	for (int i = 0; i < DIMENSIONS; i++) {
 		for (int j = 0; j < DIMENSIONS; j++) {
 			// if the number in position [i][j] meet the game rules
-			if (isValidMove(table, i, j, table[i][j], true)) {
+			if (isValidMove(table, i, j, table[i][j], true) && table[i][j] != EMPTYCELLINT) {
 				good++;
 			} else {
 				bad++;

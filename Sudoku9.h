@@ -32,8 +32,10 @@ public:
 	 *
 	 * @param filename Name of the file to read from.
 	 * @param table Pointer to a matrix with sudoku.
+	 * 
+	 * @return If number if any position was different in table and file
 	 */
-	void readFile(std::string filename, int** table);
+	bool readFile(std::string filename, int** table);
 
 	/**
 	 * This function is responsible for writing sudoku grid into the file from the matrix.

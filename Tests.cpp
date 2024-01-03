@@ -131,6 +131,30 @@ bool Tests::testGetStatistics() {
         return false;
     }
 
+    // testing with good solution
+    std::string mixed[] = {
+        "125368479",
+        "734259168",
+        "639171535",
+        "216435797",
+        "355890624",
+        "498726513",
+        "960787342",
+        "841912756",
+        "972644981"
+    };
+    setGridValues(mixed);
+
+    expectedGood = 55;
+    expectedBad = 26;
+
+    sudoku->getStatistics(sudoku->grid, actualGood, actualBad);
+
+    if (actualGood != expectedGood || actualBad != expectedBad) {
+        std::cout << "Test failed: Expected 55 good and 26 bad!" << std::endl;
+        return false;
+    }
+
 
     std::cout << "Test passed!" << std::endl;
     return true;
@@ -219,6 +243,20 @@ bool Tests::testFilledInCell() {
 }
 
 bool Tests::testResetGrid() {
+    std::string filled81[] = {
+        "125368479",
+        "734259168",
+        "689174235",
+        "216435897",
+        "357891624",
+        "498726513",
+        "961587342",
+        "843912756",
+        "572643981"
+    };
+
+    setGridValues(filled81);
+
     sudoku->resetGrid(sudoku->grid);
 
     for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
@@ -343,7 +381,7 @@ bool Tests::testBacktrack() {
     };
 
     // only solution to puzzle
-    std::string uniqueSolutionSudokuSolution[] = {
+    std::string uniqueSolutionSudokuSolution17[] = {
         "237841569",
         "186795243",
         "594326718",
@@ -360,8 +398,49 @@ bool Tests::testBacktrack() {
 
     for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
         for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
-            int testVal = uniqueSolutionSudokuSolution[i][j] - '0'; // converting char to int
+            int testVal = uniqueSolutionSudokuSolution17[i][j] - '0'; // converting char to int
             
+            int expected = sudoku->grid[i][j]; // checking if every number matc the only solution
+            if (testVal != expected) {
+                std::cout << "Test failed: Sudoku solution doesn't match!" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // testing with puzzle with only one solution
+    std::string uniqueSolutionSudokux[] = {
+        "050300007",
+        "000005024",
+        "098020600",
+        "901003206",
+        "030000010",
+        "500200008",
+        "405090380",
+        "010070002",
+        "000104070"
+    };
+
+    // only solution to puzzle
+    std::string uniqueSolutionSudokuSolutionx[] = {
+        "254316897",
+        "763985124",
+        "198427653",
+        "981753246",
+        "632849715",
+        "547261938",
+        "475692381",
+        "319578462",
+        "826134579"
+    };
+    setGridValues(uniqueSolutionSudokux);
+
+    sudoku->backtrack(sudoku->grid, 0, 0);
+
+    for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
+        for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
+            int testVal = uniqueSolutionSudokuSolutionx[i][j] - '0'; // converting char to int
+
             int expected = sudoku->grid[i][j]; // checking if every number matc the only solution
             if (testVal != expected) {
                 std::cout << "Test failed: Sudoku solution doesn't match!" << std::endl;
