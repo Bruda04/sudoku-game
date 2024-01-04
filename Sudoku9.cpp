@@ -40,8 +40,8 @@ bool Sudoku9::readFile(std::string filename, int** table) {
         return false;
     }
 
-	bool same = true;
-	bool allEmpty = true;
+	bool same = true; // if it matches previous table
+	bool allEmpty = true; // if previous table was empty
     std::string line = "";
 	int number = 0;
 

@@ -1,5 +1,5 @@
 // Author: Luka Bradic SV53/2022
-// Last update: 2.1.2024.
+// Last update: 3.1.2024.
 // About:
 // Here is the Sudoku9 class that is uset to play sudoku game.
 // It contains methods that are used to load/write board from/to file.

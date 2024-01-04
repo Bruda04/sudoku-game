@@ -368,8 +368,8 @@ bool Tests::testBacktrack() {
     sudoku->resetGrid(sudoku->grid);
 
     // testing with puzzle with only one solution
-    std::string uniqueSolutionSudoku17[] = {
-        "000801000",
+    std::string uniqueSolutionSudoku1[] = {
+        "200801000",
         "000000043",
         "500000000",
         "000070800",
@@ -381,7 +381,7 @@ bool Tests::testBacktrack() {
     };
 
     // only solution to puzzle
-    std::string uniqueSolutionSudokuSolution17[] = {
+    std::string uniqueSolutionSudokuSolution1[] = {
         "237841569",
         "186795243",
         "594326718",
@@ -392,13 +392,13 @@ bool Tests::testBacktrack() {
         "853467921",
         "971253684"
     };
-    setGridValues(uniqueSolutionSudoku17);
+    setGridValues(uniqueSolutionSudoku1);
 
     sudoku->backtrack(sudoku->grid, 0, 0);
 
     for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
         for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
-            int testVal = uniqueSolutionSudokuSolution17[i][j] - '0'; // converting char to int
+            int testVal = uniqueSolutionSudokuSolution1[i][j] - '0'; // converting char to int
             
             int expected = sudoku->grid[i][j]; // checking if every number matc the only solution
             if (testVal != expected) {
@@ -409,7 +409,7 @@ bool Tests::testBacktrack() {
     }
 
     // testing with puzzle with only one solution
-    std::string uniqueSolutionSudokux[] = {
+    std::string uniqueSolutionSudoku2[] = {
         "050300007",
         "000005024",
         "098020600",
@@ -422,7 +422,7 @@ bool Tests::testBacktrack() {
     };
 
     // only solution to puzzle
-    std::string uniqueSolutionSudokuSolutionx[] = {
+    std::string uniqueSolutionSudokuSolution2[] = {
         "254316897",
         "763985124",
         "198427653",
@@ -433,13 +433,13 @@ bool Tests::testBacktrack() {
         "319578462",
         "826134579"
     };
-    setGridValues(uniqueSolutionSudokux);
+    setGridValues(uniqueSolutionSudoku2);
 
     sudoku->backtrack(sudoku->grid, 0, 0);
 
     for (int i = 0; i < sudoku->DIMENSIONS; ++i) {
         for (int j = 0; j < sudoku->DIMENSIONS; ++j) {
-            int testVal = uniqueSolutionSudokuSolutionx[i][j] - '0'; // converting char to int
+            int testVal = uniqueSolutionSudokuSolution2[i][j] - '0'; // converting char to int
 
             int expected = sudoku->grid[i][j]; // checking if every number matc the only solution
             if (testVal != expected) {

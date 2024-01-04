@@ -1,3 +1,8 @@
+// Author: Luka Bradic SV53/2022
+// Last update: 3.1.2023.
+// About:
+// Here is the Tests class used to test funtionality of Sudoku9
+
 #pragma once
 #include "Sudoku9.h"
 
